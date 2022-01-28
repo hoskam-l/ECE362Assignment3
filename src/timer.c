@@ -4,8 +4,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
-//#include <sys/types.h>
-//#include <sys/wait.h>
+#include<signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 
 // exec_prog from: https://stackoverflow.com/questions/5237482/how-do-i-execute-external-program-within-c-code-in-linux-with-arguments
@@ -48,6 +49,7 @@ int main(int argc, char *argv[])
                         }
                         sleep(1);
                 }
+                kill(my_pid, SIGKILL);
                 t_end = time(NULL) - t_begin;
                 printf("Time: %ld s\n", t_end);
 
