@@ -4,22 +4,21 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
-#include <sys/types.h>
-#include <sys/wait.h>
+//#include <sys/types.h>
+//#include <sys/wait.h>
 
 
 // exec_prog from: https://stackoverflow.com/questions/5237482/how-do-i-execute-external-program-within-c-code-in-linux-with-arguments
 #define MAX_TIME 3
 
-static int exec_prog(const char **argv)
+
+ 
+int main(int argc, char *argv[])
 {
         pid_t my_pid;
         int status, timeout;
-        const char **newargv = argv;
-        
-        // New argv ignores first argument
-        newargv++;
-        
+        char **newargv = argv++;
+        time_t t_begin, t_end;
         // Create fork
         my_pid = fork();
         if (my_pid < 0)
@@ -31,7 +30,7 @@ static int exec_prog(const char **argv)
         else if (my_pid == 0)
         {
                 // Child process, execute code
-                if (-1 == execvp(argv[0], (char **)newargv))
+                if (-1 == execvp(argv[0], newargv))
                 {
                         perror("child process execve failed");
                         return -1;
@@ -40,6 +39,7 @@ static int exec_prog(const char **argv)
         else
         {
                 // Parent, wait for child
+                t_begin = time(NULL);
                 timeout = MAX_TIME;
                 while (0 == waitpid(my_pid , &status , WNOHANG)) {
                         if ( --timeout < 0 ) {
@@ -48,6 +48,8 @@ static int exec_prog(const char **argv)
                         }
                         sleep(1);
                 }
+                t_end = time(NULL) - t_begin;
+                printf("Time: %ld s\n", t_end);
 
                 // Check status of child process
                 /*if (1 != WIFEXITED(status) || 0 != WEXITSTATUS(status)) {
@@ -58,15 +60,4 @@ static int exec_prog(const char **argv)
         
         // Success
         return 0;
-}
-
- 
-int main(int argc, char *argv[])
-{
-        time_t begin = time(NULL);
-        int rc = exec_prog((const char **)argv);
-        time_t end = time(NULL) - begin;
-
-        printf("Time: %ld s\n", end);
-        return rc;
 }
