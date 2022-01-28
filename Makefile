@@ -4,11 +4,11 @@
 
 # Compiler settings - Can be customized.
 CC = gcc
-CXXFLAGS = -std=c11 -Wall
+CXXFLAGS = -std=c99 -Wall -g
 LDFLAGS = 
 
 # Makefile settings - Can be customized.
-APPNAME = myapp
+APPNAME = timer
 EXT = .c
 SRCDIR = src
 OBJDIR = obj
