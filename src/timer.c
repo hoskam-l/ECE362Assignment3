@@ -59,10 +59,11 @@ static int exec_prog(const char **argv)
                 }
 
                 // Check status of child process
-                if (1 != WIFEXITED(status) || 0 != WEXITSTATUS(status)) {
-                        perror("child process failed");
-                        return -1;
-                }
+               
+		// if (1 != WIFEXITED(status) || 0 != WEXITSTATUS(status)) {
+                //        perror("child process failed");
+                //        return -1;
+                //}
         }
         
         // Success
