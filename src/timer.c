@@ -15,10 +15,12 @@ static int exec_prog(const char **argv)
 {
         pid_t my_pid;
         int status, timeout;
-        const char **newargv = argv;
+        argv++;
+        //const char **newargv = argv++;
         
         // New argv ignores first argument
-        newargv++;
+        //newargv+=2;
+        
         
         // Create fork
         my_pid = fork();
@@ -30,11 +32,15 @@ static int exec_prog(const char **argv)
         }
         else if (my_pid == 0)
         {
-		printf("newargv[0]: %s\n",newargv[0]);
-		printf("argv[0]: %s\n", argv[0]);
+		// printf("newargv[0]: %s\n",newargv[0]);
+		// printf("argv[0]: %s\n", argv[0]);
+                // printf("newargv[1]: %s\n",newargv[1]);
+		// printf("argv[1]: %s\n", argv[1]);
+                // printf("newargv[2]: %s\n",newargv[2]);
+		// printf("argv[2]: %s\n", argv[2]);
 
                 // Child process, execute code
-                if (-1 == execvp(newargv[0], (char **)newargv))
+                if (-1 == execvp(argv[0], (char **)argv))
                 {
                         perror("child process execve failed");
                         return -1;
@@ -53,10 +59,10 @@ static int exec_prog(const char **argv)
                 }
 
                 // Check status of child process
-                /*if (1 != WIFEXITED(status) || 0 != WEXITSTATUS(status)) {
+                if (1 != WIFEXITED(status) || 0 != WEXITSTATUS(status)) {
                         perror("child process failed");
                         return -1;
-                }*/
+                }
         }
         
         // Success
