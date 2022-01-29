@@ -31,7 +31,7 @@ static int exec_prog(const char **argv)
         else if (my_pid == 0)
         {
                 // Child process, execute code
-                if (-1 == execvp(argv[0], (char **)newargv))
+                if (-1 == execvp(newargv[0], (char **)newargv))
                 {
                         perror("child process execve failed");
                         return -1;
