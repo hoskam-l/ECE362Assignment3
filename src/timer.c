@@ -7,21 +7,67 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+void printLine(const char *line)
+{
+        int n = strlen(line);
+
+        if (write(STDOUT_FILENO, line, n) != n)
+                perror("write error");
+
+        if (write(STDOUT_FILENO, "\n", 2) != 2)
+                perror("write error");
+}
+// from: https://stackoverflow.com/questions/8257714/how-to-convert-an-int-to-string-in-c
+/**
+ * C++ version 0.4 char* style "itoa":
+ * Written by Lukás Chmela
+ * Released under GPLv3.
+ */
+char *itoa(int value, char *result, int base)
+{
+        // check that the base if valid
+        if (base < 2 || base > 36)
+        {
+                *result = '\0';
+                return result;
+        }
+
+        char *ptr = result, *ptr1 = result, tmp_char;
+        int tmp_value;
+
+        do
+        {
+                tmp_value = value;
+                value /= base;
+                *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz"[35 + (tmp_value - value * base)];
+        } while (value);
+
+        // Apply negative sign
+        if (tmp_value < 0)
+                *ptr++ = '-';
+        *ptr-- = '\0';
+        while (ptr1 < ptr)
+        {
+                tmp_char = *ptr;
+                *ptr-- = *ptr1;
+                *ptr1++ = tmp_char;
+        }
+        return result;
+}
 
 // exec_prog from: https://stackoverflow.com/questions/5237482/how-do-i-execute-external-program-within-c-code-in-linux-with-arguments
-#define MAX_TIME 3
+#define MAX_TIME 10
 
 static int exec_prog(const char **argv)
 {
         pid_t my_pid;
         int status, timeout;
         argv++;
-        //const char **newargv = argv++;
-        
+        // const char **newargv = argv++;
+
         // New argv ignores first argument
-        //newargv+=2;
-        
-        
+        // newargv+=2;
+
         // Create fork
         my_pid = fork();
         if (my_pid < 0)
@@ -32,13 +78,6 @@ static int exec_prog(const char **argv)
         }
         else if (my_pid == 0)
         {
-		// printf("newargv[0]: %s\n",newargv[0]);
-		// printf("argv[0]: %s\n", argv[0]);
-                // printf("newargv[1]: %s\n",newargv[1]);
-		// printf("argv[1]: %s\n", argv[1]);
-                // printf("newargv[2]: %s\n",newargv[2]);
-		// printf("argv[2]: %s\n", argv[2]);
-
                 // Child process, execute code
                 if (-1 == execvp(argv[0], (char **)argv))
                 {
@@ -50,8 +89,10 @@ static int exec_prog(const char **argv)
         {
                 // Parent, wait for child
                 timeout = MAX_TIME;
-                while (0 == waitpid(my_pid , &status , WNOHANG)) {
-                        if ( --timeout < 0 ) {
+                while (0 == waitpid(my_pid, &status, WNOHANG))
+                {
+                        if (--timeout < 0)
+                        {
                                 perror("timeout");
                                 return -1;
                         }
@@ -59,24 +100,34 @@ static int exec_prog(const char **argv)
                 }
 
                 // Check status of child process
-               
-		// if (1 != WIFEXITED(status) || 0 != WEXITSTATUS(status)) {
+
+                // if (1 != WIFEXITED(status) || 0 != WEXITSTATUS(status)) {
                 //        perror("child process failed");
                 //        return -1;
                 //}
         }
-        
+
         // Success
         return 0;
-}
+} 
 
- 
 int main(int argc, char *argv[])
 {
-        time_t begin = time(NULL);
+        int begin, end;
+        begin = time(NULL);
         int rc = exec_prog((const char **)argv);
-        time_t end = time(NULL) - begin;
+        end = time(NULL) - begin;
 
-        printf("Time: %ld s\n", end);
+        const char beginString[] = "\nTime(s): ";
+        char strTime[sizeof(int) + 1];
+        itoa((int)end, strTime, 10);
+        size_t len1 = strlen(beginString), len2 = strlen(strTime);
+        char *tgt = (char *)malloc(len1 + len2 + 1);
+
+        strcpy(tgt, beginString);
+        strcat(tgt, strTime);
+
+        printLine(tgt);
+       
         return rc;
 }
