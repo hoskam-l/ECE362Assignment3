@@ -60,7 +60,7 @@ char *itoa(int value, char *result, int base)
 
 static int exec_prog(const char **argv)
 {
-        pid_t my_pid;
+        pid_t child_pid, wpid;
         int status, timeout;
         argv++;
         // const char **newargv = argv++;
@@ -69,14 +69,14 @@ static int exec_prog(const char **argv)
         // newargv+=2;
 
         // Create fork
-        my_pid = fork();
-        if (my_pid < 0)
+        child_pid = fork();
+        if (child_pid < 0)
         {
                 // Error
                 perror("fork failed");
                 return -1;
         }
-        else if (my_pid == 0)
+        else if (child_pid == 0)
         {
                 // Child process, execute code
                 if (-1 == execvp(argv[0], (char **)argv))
@@ -88,16 +88,44 @@ static int exec_prog(const char **argv)
         else
         {
                 // Parent, wait for child
-                timeout = MAX_TIME;
-                while (0 == waitpid(my_pid, &status, WNOHANG))
+                //from https://pubs.opengroup.org/onlinepubs/9699919799/
+                do
                 {
-                        if (--timeout < 0)
+                        wpid = waitpid(child_pid, &status, WUNTRACED);
+                        if (wpid == -1)
                         {
-                                perror("timeout");
-                                return -1;
+                                perror("waitpid");
+                                exit(EXIT_FAILURE);
                         }
-                        sleep(1);
-                }
+
+                        if (WIFEXITED(status))
+                        {
+                                printLine("child exited");
+                        }
+                        else if (WIFSIGNALED(status))
+                        {
+                                printLine("child killed");
+                        }
+                        else if (WIFSTOPPED(status))
+                        {
+                                printLine("child stopped");
+                        }
+                        else
+                        { /* Non-standard case -- may never happen */
+                                printLine("Unexpected status");
+                        }
+                } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+
+                // timeout = MAX_TIME;
+                // while (0 == waitpid(child_pid, &status, WNOHANG))
+                // {
+                //         if (--timeout < 0)
+                //         {
+                //                 perror("timeout");
+                //                 return -1;
+                //         }
+                //         sleep(1);
+                // }
 
                 // Check status of child process
 
@@ -109,7 +137,7 @@ static int exec_prog(const char **argv)
 
         // Success
         return 0;
-} 
+}
 
 int main(int argc, char *argv[])
 {
@@ -128,6 +156,6 @@ int main(int argc, char *argv[])
         strcat(tgt, strTime);
 
         printLine(tgt);
-       
+
         return rc;
 }
