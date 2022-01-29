@@ -30,6 +30,9 @@ static int exec_prog(const char **argv)
         }
         else if (my_pid == 0)
         {
+		printf("newargv[0]: %s\n",newargv[0]);
+		printf("argv[0]: %s\n", argv[0]);
+
                 // Child process, execute code
                 if (-1 == execvp(newargv[0], (char **)newargv))
                 {
