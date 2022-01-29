@@ -116,23 +116,7 @@ static int exec_prog(const char **argv)
                         }
                 } while (!WIFEXITED(status) && !WIFSIGNALED(status));
 
-                // timeout = MAX_TIME;
-                // while (0 == waitpid(child_pid, &status, WNOHANG))
-                // {
-                //         if (--timeout < 0)
-                //         {
-                //                 perror("timeout");
-                //                 return -1;
-                //         }
-                //         sleep(1);
-                // }
-
-                // Check status of child process
-
-                // if (1 != WIFEXITED(status) || 0 != WEXITSTATUS(status)) {
-                //        perror("child process failed");
-                //        return -1;
-                //}
+        
         }
 
         // Success
