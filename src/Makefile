@@ -32,11 +32,11 @@ $(APPNAME1).o: $(APPNAME1).c
 
 
 
-#$(APPNAME2): piper.o
-#	$(CC) $(CXXFLAGS) -o $@ $^ 
+$(APPNAME2): piper.o
+	$(CC) $(CXXFLAGS) -o $@ $^ 
 
-#piper.o: piper.c 
-#	$(CC) $(CXXFLAGS) -c $<
+piper.o: piper.c 
+	$(CC) $(CXXFLAGS) -c $<
 
 
 
