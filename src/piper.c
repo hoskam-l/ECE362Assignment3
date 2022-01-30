@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
         {
             if (isspace(buf[i]))
             {
-                if (stringArray[i - 1] != ' ')
+                if (stringArray[elementCount - 1] != ' ')
                 {
                     stringArray[elementCount++] = ' ';
                 }
