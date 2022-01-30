@@ -4,14 +4,16 @@
 #include <unistd.h>
 #include <ctype.h>
 
-#define BUFFSIZE 5000
+#define BUFFSIZE 10
 
-int main(int argc, char *argv[])
+const char *readSTDIN()
 {
     int n;
     char buf[BUFFSIZE];
     char *inputElements = malloc(sizeof(char));
+    int stringElements = 0;
     int elementCount = 0;
+
 
     while ((n = read(STDIN_FILENO, buf, BUFFSIZE)) > 0) // Read from STDIN and set the number read to n
     {
@@ -23,20 +25,31 @@ int main(int argc, char *argv[])
         {
             if (isspace(buf[i]))
             {
-                if (!isspace(inputElements[elementCount - 1]))
+                if (!isspace(inputElements[stringElements - 1]))
                 {
-                    inputElements[elementCount++] = ' ';
-                    inputElements = realloc(inputElements, elementCount* sizeof(char));
+                    inputElements[stringElements++] = ' ';
+                    inputElements = realloc(inputElements, stringElements* sizeof(char));
+                    elementCount++;
                 }
             }
             else
             {
-                inputElements[elementCount++] = buf[i];
-                inputElements = realloc(inputElements, elementCount* sizeof(char));
+                inputElements[stringElements++] = buf[i];
+                inputElements = realloc(inputElements, stringElements* sizeof(char));
+                
             }
         }
     }
+    
     printf("%d elements\n", elementCount);
+    return (const char*)inputElements;
+}
+
+int main(int argc, char *argv[])
+{
+
+    
+    const char *inputElements = readSTDIN();
     printf("string array: %s\n", inputElements);
     return 0;
 }
