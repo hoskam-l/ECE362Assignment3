@@ -47,6 +47,7 @@ const char *readSTDIN()
             }
         }
     }
+    inputElements[stringElements] = '\0';
     
     printf("%d elements\n", elementCount);
     return (const char*)inputElements;
