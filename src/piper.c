@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 {
     int n;
     char buf[BUFFSIZE];
-    char stringArray[BUFFSIZE];
+    char *inputElements = malloc(sizeof(char));
     int elementCount = 0;
 
     while ((n = read(STDIN_FILENO, buf, BUFFSIZE)) > 0) // Read from STDIN and set the number read to n
@@ -23,18 +23,20 @@ int main(int argc, char *argv[])
         {
             if (isspace(buf[i]))
             {
-                if (stringArray[elementCount - 1] != ' ')
+                if (!isspace(inputElements[elementCount - 1]))
                 {
-                    stringArray[elementCount++] = ' ';
+                    inputElements[elementCount++] = ' ';
+                    inputElements = realloc(inputElements, elementCount* sizeof(char));
                 }
             }
             else
             {
-                stringArray[elementCount++] = buf[i];
+                inputElements[elementCount++] = buf[i];
+                inputElements = realloc(inputElements, elementCount* sizeof(char));
             }
         }
     }
     printf("%d elements\n", elementCount);
-    printf("string array: %s\n", stringArray);
+    printf("string array: %s\n", inputElements);
     return 0;
 }
