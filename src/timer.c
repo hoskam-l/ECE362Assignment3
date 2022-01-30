@@ -56,17 +56,13 @@ char *itoa(int value, char *result, int base)
 }
 
 // exec_prog from: https://stackoverflow.com/questions/5237482/how-do-i-execute-external-program-within-c-code-in-linux-with-arguments
-#define MAX_TIME 10
+
 
 static int exec_prog(const char **argv)
 {
         pid_t child_pid, wpid;
-        int status, timeout;
+        int status;
         argv++;
-        // const char **newargv = argv++;
-
-        // New argv ignores first argument
-        // newargv+=2;
 
         // Create fork
         child_pid = fork();
@@ -126,6 +122,8 @@ static int exec_prog(const char **argv)
 int main(int argc, char *argv[])
 {
         int begin, end;
+
+        // Start 
         begin = time(NULL);
         int rc = exec_prog((const char **)argv);
         end = time(NULL) - begin;
