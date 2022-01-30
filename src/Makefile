@@ -1,14 +1,15 @@
 # ECE362
-# Assignment 2 Problem 2
+# Assignment 3 
 # Dr. Schubert
 # by luke hoskam
-# Makefile for Assignment 2
+# by Hayden Galante
+# Makefile for Assignment 3
 
-##Required Targest for Assignment 2
-# log:  compile the log program
-# logtest: test the log program
-# header: compile the header program
-# headertest: test the header program
+##Required Targest for Assignment 3
+# timer:  compile the timer program
+# timertest: test the timer program
+# piper: compile the piper program
+# pipertest: test the piper program
 # all: compile and test both programs
 
 # Compiler settings

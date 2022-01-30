@@ -1,3 +1,10 @@
+// ECE362
+// Assignment 3 part 1
+// Dr. Schubert
+// by luke hoskam
+// by Hayden Galante
+// Makefile for Assignment 3
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
