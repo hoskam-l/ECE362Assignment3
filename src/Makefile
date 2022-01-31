@@ -37,7 +37,7 @@ $(APPNAME1)test: $(APPNAME1)
 	./$(APPNAME1) sleep 5
 	
 
-$(APPNAME2): piper.o myTools.o
+$(APPNAME2): piper.o 
 	$(CC) $(CXXFLAGS) -o $@ $^ 
 
 $(APPNAME2).o: piper.c 
@@ -51,8 +51,7 @@ $(APPNAME2)test: $(APPNAME2)
 	@echo Test3:
 	./$(APPNAME2) <piperinput3.txt
 
-myTools.o: include/myTools.c include/myTools.h
-	gcc -c include/myTools.c
+
 
 all: clean clearscr $(APPNAME1) $(APPNAME2)
 
