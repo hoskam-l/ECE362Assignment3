@@ -33,6 +33,8 @@ $(APPNAME1).o: $(APPNAME1).c
 $(APPNAME1)test: $(APPNAME1)
 	./$(APPNAME1) ls -l /usr/bin
 	./$(APPNAME1) cat timer.c
+	./$(APPNAME1) ping google.com -c5
+	./$(APPNAME1) sleep 5
 	
 
 $(APPNAME2): piper.o myTools.o
@@ -52,7 +54,7 @@ $(APPNAME2)test: $(APPNAME2)
 myTools.o: include/myTools.c include/myTools.h
 	gcc -c include/myTools.c
 
-
+all: clean clearscr $(APPNAME1) $(APPNAME2)
 
 clean: 
 	rm -f *.o *.exe piper timer

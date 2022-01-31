@@ -18,7 +18,7 @@ const char *readSTDIN(int *count);
 void printLine(const char *line);
 int *strToIntArray(char *string, int count);
 char *itoa(int value, char *result, int base);
-void addNumToString(const char beginString[], long number);
+void addNumToString(const char beginString[], int number);
 char *ltoa(long N, char *str, int base);
 
 #endif // !_MYTOOLS_H
