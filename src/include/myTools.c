@@ -3,7 +3,7 @@
 
 const char *readSTDIN(int *count)
 {
-	int n;
+	int n, i;
 	char buf[BUFFSIZE];
 	char *inputElements = malloc(sizeof(char));
 	int stringElements = 0;
