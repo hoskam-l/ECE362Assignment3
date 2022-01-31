@@ -9,6 +9,8 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <string.h>
+#include <sys/types.h>
+
 
 #define BUFFSIZE 10
 
