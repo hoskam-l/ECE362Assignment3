@@ -30,13 +30,15 @@ $(APPNAME1): $(APPNAME1).o
 $(APPNAME1).o: $(APPNAME1).c
 	$(CC) $(CXXFLAGS) -c $<
 
-
-
+$(APPNAME1)test:
+	./$(APPNAME1) ls -l /usr/bin
+	./$(APPNAME1) cat timer.c
+	
 
 $(APPNAME2): piper.o
 	$(CC) $(CXXFLAGS) -o $@ $^ 
 
-piper.o: piper.c 
+$(APPNAME2).o: piper.c 
 	$(CC) $(CXXFLAGS) -c $<
 
 
