@@ -30,17 +30,22 @@ $(APPNAME1): $(APPNAME1).o
 $(APPNAME1).o: $(APPNAME1).c
 	$(CC) $(CXXFLAGS) -c $<
 
-$(APPNAME1)test:
+$(APPNAME1)test: $(APPNAME1)
 	./$(APPNAME1) ls -l /usr/bin
 	./$(APPNAME1) cat timer.c
 	
 
-$(APPNAME2): piper.o
+$(APPNAME2): piper.o myTools.o
 	$(CC) $(CXXFLAGS) -o $@ $^ 
 
 $(APPNAME2).o: piper.c 
 	$(CC) $(CXXFLAGS) -c $<
 
+$(APPNAME2)test: $(APPNAME2)
+	./$(APPNAME2) <piperinput.txt
+
+myTools.o: include/myTools.c include/myTools.h
+	gcc -c include/myTools.c
 
 
 
