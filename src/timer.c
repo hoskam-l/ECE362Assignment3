@@ -3,7 +3,7 @@
 // Dr. Schubert
 // by luke hoskam
 // by Hayden Galante
-// Makefile for Assignment 3
+// Timer Program for Assignment 3
 
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
@@ -14,13 +14,15 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+
+// printLine function will print the line sent to STDOUT and add a '/n' to start a new line
 void printLine(const char *line)
 {
         int n = strlen(line);
 
         if (write(STDOUT_FILENO, line, n) != n)
                 perror("write error");
-
+        // Since printLine we send a \n
         if (write(STDOUT_FILENO, "\n", 2) != 2)
                 perror("write error");
 }
@@ -63,7 +65,7 @@ char *itoa(int value, char *result, int base)
 }
 
 // exec_prog from: https://stackoverflow.com/questions/5237482/how-do-i-execute-external-program-within-c-code-in-linux-with-arguments
-
+// This hardly resembles the orginal program.
 
 static int exec_prog(const char **argv)
 {
@@ -98,7 +100,7 @@ static int exec_prog(const char **argv)
                         if (wpid == -1)
                         {
                                 perror("waitpid");
-                                exit(EXIT_FAILURE);
+                                return -1;;
                         }
 
                         if (WIFEXITED(status))
@@ -130,21 +132,31 @@ int main(int argc, char *argv[])
 {
         int begin, end;
 
-        // Start 
+        // Start timer
         begin = time(NULL);
+        // execute program
         int rc = exec_prog((const char **)argv);
+        // end timer and calculate total time
         end = time(NULL) - begin;
 
+
+        // constant for first prart of the printLine
         const char beginString[] = "\nTime(s): ";
+        // Create a string to hold the end time value
         char strTime[sizeof(int) + 1];
+        // convert the int value of the total time to a string
         itoa((int)end, strTime, 10);
+        //create a temp string (tgt) the proper size of strTime and beginString
         size_t len1 = strlen(beginString), len2 = strlen(strTime);
         char *tgt = (char *)malloc(len1 + len2 + 1);
 
+        // copy the first part to tgt
         strcpy(tgt, beginString);
+        // cat the time after the first part of the string
         strcat(tgt, strTime);
-
+        // send to the printLine function
         printLine(tgt);
 
+        // if RC is negative there was an error...
         return rc;
 }
