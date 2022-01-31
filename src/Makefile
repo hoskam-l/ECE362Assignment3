@@ -46,6 +46,8 @@ $(APPNAME2)test: $(APPNAME2)
 	./$(APPNAME2) <piperinput1.txt
 	@echo Test2:
 	./$(APPNAME2) <piperinput2.txt
+	@echo Test3:
+	./$(APPNAME2) <piperinput3.txt
 
 myTools.o: include/myTools.c include/myTools.h
 	gcc -c include/myTools.c
