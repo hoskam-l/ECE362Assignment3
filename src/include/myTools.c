@@ -15,7 +15,7 @@ const char *readSTDIN(int *count)
 		{
 			perror("read error");
 		}
-		for (int i = 0; i < n; i++)
+		for (i = 0; i < n; i++)
 		{
 			if (isspace(buf[i]))
 			{
