@@ -42,7 +42,10 @@ $(APPNAME2).o: piper.c
 	$(CC) $(CXXFLAGS) -c $<
 
 $(APPNAME2)test: $(APPNAME2)
-	./$(APPNAME2) <piperinput.txt
+	@echo Test1:
+	./$(APPNAME2) <piperinput1.txt
+	@echo Test2:
+	./$(APPNAME2) <piperinput2.txt
 
 myTools.o: include/myTools.c include/myTools.h
 	gcc -c include/myTools.c

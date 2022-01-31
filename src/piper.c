@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
             buf[n] = '\0'; // terminate the string
             // printf("read %d bytes from the pipe: %s\n", n, buf);
             int *intElementsReturned1 = strToIntArray(buf, elementCount);
-            int sum = 0;
+            long sum = 0;
             for (int i = 0; i < elementCount; i++)
             {
                 sum = sum + intElementsReturned1[i];
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
             buf[m] = '\0'; // terminate the string
             // printf("read %d bytes from the pipe: %s \n", m, buf2);
             int *intElementsReturned2 = strToIntArray(buf2, elementCount);
-            int product = 1;
+            long product = 1;
             for (int i = 0; i < elementCount; i++)
             {
                 product = product * intElementsReturned2[i];
