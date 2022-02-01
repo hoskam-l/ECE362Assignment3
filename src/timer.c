@@ -62,8 +62,6 @@ void addNumToString(const char beginString[], int number)
     if (tgt == NULL)
     {
         err_out(BAD_ALLOC,0);
-        // perror("ERROR allocating memory.");
-        // exit(-1);
     }
     snprintf(tgt, MAX_APPEND_STR_SIZE, "%s %d", beginString, number);
     // send to the printLine function
@@ -77,17 +75,7 @@ void printLine(const char *line)
 
         Write(STDOUT_FILENO,line, n);
         Write(STDOUT_FILENO,NEW_LINE,strlen(NEW_LINE));
-        // if (write(STDOUT_FILENO, line, n) != n)
-        // {
-        //         perror("write error");
-        //         exit(-1);
-        // }
-        // Since printLine we send a \n
-        // if (write(STDOUT_FILENO, "\n", 2) != 2)
-        // {
-        //         perror("write error");
-        //         exit(-1);
-        // }
+       
 }
 
 // exec_prog from: https://stackoverflow.com/questions/5237482/how-do-i-execute-external-program-within-c-code-in-linux-with-arguments
@@ -105,8 +93,6 @@ static int exec_prog(const char **argv)
         {
                 // Error
                 err_out(BAD_FORK,0);
-                // perror("fork failed");
-                // exit(-1);
         }
         else if (child_pid == 0)
         {
@@ -114,8 +100,6 @@ static int exec_prog(const char **argv)
                 if (-1 == execvp(argv[0], (char **)argv))
                 {
                         err_out(BAD_EXEC,0);
-                        // perror("child process execve failed");
-                        // exit(-1);
                 }
         }
         else
@@ -128,8 +112,6 @@ static int exec_prog(const char **argv)
                         if (wpid == -1)
                         {
                                 err_out(BAD_WAITPID,0);
-                                // perror("waitpid");
-                                // exit(-1);;
                         }
 
                         if (WIFEXITED(status))
@@ -170,8 +152,6 @@ int main(int argc, char *argv[])
         {
                 //should never happen
                 err_out(BAD_EXEC,0);
-                // perror("Error executing program");
-                // exit(-1);
         }
         // end timer and calculate total time
         end = time(NULL) - begin;

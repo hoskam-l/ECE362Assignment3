@@ -47,39 +47,14 @@ int main(int argc, char *argv[])
     // set up the pipe
 
     Pipe(fd);
-    // pipe(fd);
-    // if (pipe(fd) < 0)
-    // {
-    //     perror("An error occured when opening the pipe.");
-    //     return 1;
-    // }
-    Pipe(fd1);
-    // pipe(fd1);
-    // if (pipe(fd1) < 0)
-    // {
-    //     perror("An error occured when opening second pipe.");
-    //     return 2;
-    // }
 
-    // write to pipe
+    Pipe(fd1);
+
     Write(fd[PIPE_INPUT], inputElements, strlen(inputElements));
-    // int c = write(fd[PIPE_INPUT], inputElements, strlen(inputElements));
-    // if (c == -1)
-    // {
-    //     perror("An error occured writing to pipe 1");
-    //     return 3;
-    // }
     Close(fd[PIPE_INPUT]);
-    //close(fd[PIPE_INPUT]);
     Write(fd1[PIPE_INPUT], inputElements, strlen(inputElements));
-    // int d = write(fd1[PIPE_INPUT], inputElements, strlen(inputElements));
-    // if (d == -1)
-    // {
-    //     perror("An error occured writing to pipe 2");
-    //     return 4;
-    // }
     Close(fd1[PIPE_INPUT]);
-    //close(fd1[PIPE_INPUT]);
+
 
     // here is the fork
     pid_t child1_pid, child2_pid;
@@ -88,8 +63,6 @@ int main(int argc, char *argv[])
     {
         // Error
         err_out(BAD_FORK,0);
-        // perror("fork failed");
-        // exit(-1);
     }
     // child process execution 1
     if (child1_pid == 0)
@@ -100,8 +73,6 @@ int main(int argc, char *argv[])
             if (n <0)
             {
                 err_out(BAD_READ,0);
-                // perror("An error occured reading from pipe 1");
-                // return 5;
             }
 
             buf[n] = '\0'; // terminate the string
@@ -114,12 +85,6 @@ int main(int argc, char *argv[])
             addNumToString("Sum: ", sum);
 
             Close(fd[PIPE_OUTPUT]);
-            // if(close(fd[PIPE_OUTPUT]))
-            // {
-            //     perror("ERROR CLOSING PIPE FOR CHILD1");
-            //     exit(-1);
-
-            // }
         }
     }
     // creates second fork off main
@@ -130,8 +95,7 @@ int main(int argc, char *argv[])
         {
             // Error
             err_out(BAD_FORK,0);
-            // perror("fork failed");
-            // exit(-1);
+
         }
         wait(NULL);
     }
@@ -157,11 +121,6 @@ int main(int argc, char *argv[])
             addNumToString("Product: ", product);
 
             Close(fd1[PIPE_OUTPUT]);
-            // if(close(fd1[PIPE_OUTPUT])<0) {
-            //     perror("ERROR CLOSING PIPE FOR CHILD2");
-            //     exit(-1);
-
-            // }
 
         }
     }
@@ -216,21 +175,8 @@ const char *readSTDIN(int *count)
 void printLine(const char *line)
 {
     int n = strlen(line);
-
     Write(STDOUT_FILENO,line,n);
     Write(STDOUT_FILENO,NEW_LINE,strlen(NEW_LINE));
-
-    // if (write(STDOUT_FILENO, line, n) != n)
-    // {
-    //     perror("write error");
-    //     exit(-1);
-    // }
-    // // Since printLine we send a \n
-    // if (write(STDOUT_FILENO, "\n", 2) != 2)
-    // {
-    //     perror("write error");
-    //     exit(-1);
-    // }
 }
 
 int *strToIntArray(char *string, int count)
@@ -239,8 +185,7 @@ int *strToIntArray(char *string, int count)
     if (intElements == NULL)
     {
         err_out(BAD_ALLOC,0);
-        // perror("ERROR allocating memory.");
-        // exit(0);
+
     }
     char *token;
     const char delim[] = " ";
@@ -257,27 +202,11 @@ int *strToIntArray(char *string, int count)
 
 void addNumToString(const char beginString[], int number)
 {
-    // constant for first prart of the printLine
-
-    // Create a string to hold the end time value
-    //char strNUM[sizeof(int) + 1];
-    // convert the int value of the total time to a string
-    // snprintf(strNUM, sizeof(int) +6 , "%d", number);
-    // create a temp string (tgt) the proper size of strTime and beginString
-    //size_t len1 = strlen(beginString), len2 = strlen(strNUM);
     char *tgt = (char *)malloc(sizeof(char) * MAX_APPEND_STR_SIZE);
     if (tgt == NULL)
     {
         err_out(BAD_ALLOC,0);
-        // perror("ERROR allocating memory.");
-        // exit(-1);
     }
-
-    // copy the first part to tgt
-    // strcpy(tgt, beginString);
-    // cat the time after the first part of the string
-    // strcat(tgt, strNUM);
-    // snprintf(tgt, (sizeof(int) +6) + strlen(beginString), "%s %d",beginString, number);
     snprintf(tgt, MAX_APPEND_STR_SIZE, "%s %d", beginString, number);
     // send to the printLine function
     printLine(tgt);
