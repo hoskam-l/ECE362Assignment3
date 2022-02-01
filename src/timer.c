@@ -14,6 +14,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#define DECIMAL 10
+
 
 // printLine function will print the line sent to STDOUT and add a '/n' to start a new line
 void printLine(const char *line)
@@ -21,10 +23,16 @@ void printLine(const char *line)
         int n = strlen(line);
 
         if (write(STDOUT_FILENO, line, n) != n)
+        {
                 perror("write error");
+                exit(-1);
+        }
         // Since printLine we send a \n
         if (write(STDOUT_FILENO, "\n", 2) != 2)
+        {
                 perror("write error");
+                exit(-1);
+        }
 }
 // from: https://stackoverflow.com/questions/8257714/how-to-convert-an-int-to-string-in-c
 /**
@@ -65,7 +73,7 @@ char *itoa(int value, char *result, int base)
 }
 
 // exec_prog from: https://stackoverflow.com/questions/5237482/how-do-i-execute-external-program-within-c-code-in-linux-with-arguments
-// This hardly resembles the orginal program.
+// This hardly resembles the orginal program from SO.
 
 static int exec_prog(const char **argv)
 {
@@ -136,6 +144,12 @@ int main(int argc, char *argv[])
         begin = time(NULL);
         // execute program
         int rc = exec_prog((const char **)argv);
+        // if RC is negative there was an error...
+        if(rc<0)
+        {
+                perror("Error executing program");
+                exit(-1);
+        }
         // end timer and calculate total time
         end = time(NULL) - begin;
 
@@ -145,7 +159,7 @@ int main(int argc, char *argv[])
         // Create a string to hold the end time value
         char strTime[sizeof(int) + 1];
         // convert the int value of the total time to a string
-        itoa((int)end, strTime, 10);
+        itoa((int)end, strTime, DECIMAL);
         //create a temp string (tgt) the proper size of strTime and beginString
         size_t len1 = strlen(beginString), len2 = strlen(strTime);
         char *tgt = (char *)malloc(len1 + len2 + 1);
@@ -157,6 +171,6 @@ int main(int argc, char *argv[])
         // send to the printLine function
         printLine(tgt);
 
-        // if RC is negative there was an error...
-        return rc;
+        
+        return 0;
 }
