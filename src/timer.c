@@ -15,7 +15,23 @@
 #include <sys/wait.h>
 
 #define DECIMAL 10
+#define MAX_APPEND_STR_SIZE 32
 
+void addNumToString(const char beginString[], int number)
+{
+
+    // create a temp string (tgt) the proper size of strTime and beginString
+    char *tgt = (char *)malloc(sizeof(char) * MAX_APPEND_STR_SIZE);
+    if (tgt == NULL)
+    {
+
+        perror("ERROR allocating memory.");
+        exit(-1);
+    }
+    snprintf(tgt, MAX_APPEND_STR_SIZE, "%s %d", beginString, number);
+    // send to the printLine function
+    printLine(tgt);
+}
 
 // printLine function will print the line sent to STDOUT and add a '/n' to start a new line
 void printLine(const char *line)
@@ -116,29 +132,7 @@ int main(int argc, char *argv[])
         // end timer and calculate total time
         end = time(NULL) - begin;
 
-
-        // constant for first prart of the printLine
-        const char beginString[] = "\nTime(s): ";
-        // Create a string to hold the end time value
-        char strTime[sizeof(int) + 1];
-        // convert the int value of the total time to a string
-<<<<<<< HEAD
-        itoa((int)end, strTime, DECIMAL);
-=======
-         snprintf(strTime, sizeof(int) +1 , "%d", end);  
-
->>>>>>> 80a543cdabd041b4dafbba53b7fc13f94c6a2cec
-        //create a temp string (tgt) the proper size of strTime and beginString
-        size_t len1 = strlen(beginString), len2 = strlen(strTime);
-        char *tgt = (char *)malloc(len1 + len2 + 1);
-
-        // copy the first part to tgt
-        strcpy(tgt, beginString);
-        // cat the time after the first part of the string
-        strcat(tgt, strTime);
-        // send to the printLine function
-        printLine(tgt);
-
+        addNumToString("\nTime(s): ", end);
         
         return 0;
 }
