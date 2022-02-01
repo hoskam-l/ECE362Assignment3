@@ -66,7 +66,7 @@ static int exec_prog(const char **argv)
         {
                 // Error
                 perror("fork failed");
-                return -1;
+                exit(-1);
         }
         else if (child_pid == 0)
         {
@@ -74,7 +74,7 @@ static int exec_prog(const char **argv)
                 if (-1 == execvp(argv[0], (char **)argv))
                 {
                         perror("child process execve failed");
-                        return -1;
+                        exit(-1);
                 }
         }
         else
@@ -87,7 +87,7 @@ static int exec_prog(const char **argv)
                         if (wpid == -1)
                         {
                                 perror("waitpid");
-                                return -1;;
+                                exit(-1);;
                         }
 
                         if (WIFEXITED(status))
