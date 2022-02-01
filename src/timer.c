@@ -34,6 +34,11 @@
 
 #define Close(fd) if(close(fd) < 0) {err_out(BAD_CLOSE, 1);}
 
+void err_out(char *msg, int printErrNo);
+void addNumToString(const char beginString[], int number);
+void printLine(const char *line);
+static int exec_prog(const char **argv);
+
 
 // From assingment2 solution
 void err_out(char *msg, int printErrNo)
