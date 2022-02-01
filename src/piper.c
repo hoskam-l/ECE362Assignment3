@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <sys/types.h>
+#include <errno.h>
 
 #define MAX_BUFFER_SIZE 1024
 #define FD_ARRAY_SIZE 2
@@ -13,12 +14,25 @@
 #define PIPE_OUTPUT 0
 #define MAX_APPEND_STR_SIZE 32
 #define BUFFSIZE 10
+#define BAD_READ  "read error\n"
+#define BAD_WRITE "write error\n"
+#define BAD_INPUT "input error\n"
+#define BAD_CLOSE "close error\n"
+#define BAD_OPEN "open error\n"
+#define BAD_FORK "fork error\n"
+#define BAD_ALLOC "allocate error\n"
+#define NEW_LINE "\n"
+
+
+#define Write(f,b,s) if(write(f,b,s) !=s) {err_out(BAD_WRITE,1);}
+#define Pipe(fd) if(pipe(fd) < 0) {err_out(BAD_OPEN, 1);}
+#define Close(fd) if(close(fd) < 0) {err_out(BAD_CLOSE, 1);}
 
 const char *readSTDIN(int *count);
 void printLine(const char *line);
 int *strToIntArray(char *string, int count);
 void addNumToString(const char beginString[], int number);
-
+void err_out(char *msg, int printErrNo);
 //--------------------------------------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
@@ -29,38 +43,43 @@ int main(int argc, char *argv[])
     char buf[MAX_BUFFER_SIZE];
     char buf2[MAX_BUFFER_SIZE];
 
+
     // set up the pipe
 
-    pipe(fd);
-    if (pipe(fd) < 0)
-    {
-        perror("An error occured when opening the pipe.");
-        return 1;
-    }
-    pipe(fd1);
-    if (pipe(fd) < 0)
-    {
-        perror("An error occured when opening second pipe.");
-        return 2;
-    }
+    Pipe(fd);
+    // pipe(fd);
+    // if (pipe(fd) < 0)
+    // {
+    //     perror("An error occured when opening the pipe.");
+    //     return 1;
+    // }
+    Pipe(fd1);
+    // pipe(fd1);
+    // if (pipe(fd1) < 0)
+    // {
+    //     perror("An error occured when opening second pipe.");
+    //     return 2;
+    // }
 
     // write to pipe
-    int c = write(fd[PIPE_INPUT], inputElements, strlen(inputElements));
-    if (c == -1)
-    {
-        perror("An error occured writing to pipe 1");
-        return 3;
-    }
-    close(fd[PIPE_INPUT]);
-
-    int d = write(fd1[PIPE_INPUT], inputElements, strlen(inputElements));
-    if (d == -1)
-    {
-        perror("An error occured writing to pipe 2");
-        return 4;
-    }
-
-    close(fd1[PIPE_INPUT]);
+    Write(fd[PIPE_INPUT], inputElements, strlen(inputElements));
+    // int c = write(fd[PIPE_INPUT], inputElements, strlen(inputElements));
+    // if (c == -1)
+    // {
+    //     perror("An error occured writing to pipe 1");
+    //     return 3;
+    // }
+    Close(fd[PIPE_INPUT]);
+    //close(fd[PIPE_INPUT]);
+    Write(fd1[PIPE_INPUT], inputElements, strlen(inputElements));
+    // int d = write(fd1[PIPE_INPUT], inputElements, strlen(inputElements));
+    // if (d == -1)
+    // {
+    //     perror("An error occured writing to pipe 2");
+    //     return 4;
+    // }
+    Close(fd1[PIPE_INPUT]);
+    //close(fd1[PIPE_INPUT]);
 
     // here is the fork
     pid_t child1_pid, child2_pid;
@@ -68,8 +87,9 @@ int main(int argc, char *argv[])
     if (child1_pid < 0)
     {
         // Error
-        perror("fork failed");
-        exit(-1);
+        err_out(BAD_FORK,0);
+        // perror("fork failed");
+        // exit(-1);
     }
     // child process execution 1
     if (child1_pid == 0)
@@ -77,10 +97,11 @@ int main(int argc, char *argv[])
         wait(NULL);
         if ((n = read(fd[PIPE_OUTPUT], buf, MAX_BUFFER_SIZE)) >= 0)
         {
-            if (n == -1)
+            if (n <0)
             {
-                perror("An error occured reading from pipe 1");
-                return 5;
+                err_out(BAD_READ,0);
+                // perror("An error occured reading from pipe 1");
+                // return 5;
             }
 
             buf[n] = '\0'; // terminate the string
@@ -92,12 +113,13 @@ int main(int argc, char *argv[])
             }
             addNumToString("Sum: ", sum);
 
-            if(close(fd[PIPE_OUTPUT]))
-            {
-                perror("ERROR CLOSING PIPE FOR CHILD1");
-                exit(-1);
+            Close(fd[PIPE_OUTPUT]);
+            // if(close(fd[PIPE_OUTPUT]))
+            // {
+            //     perror("ERROR CLOSING PIPE FOR CHILD1");
+            //     exit(-1);
 
-            }
+            // }
         }
     }
     // creates second fork off main
@@ -107,8 +129,9 @@ int main(int argc, char *argv[])
         if (child2_pid < 0)
         {
             // Error
-            perror("fork failed");
-            exit(-1);
+            err_out(BAD_FORK,0);
+            // perror("fork failed");
+            // exit(-1);
         }
         wait(NULL);
     }
@@ -133,11 +156,12 @@ int main(int argc, char *argv[])
             }
             addNumToString("Product: ", product);
 
-            if(close(fd1[PIPE_OUTPUT])<0) {
-                perror("ERROR CLOSING PIPE FOR CHILD2");
-                exit(-1);
+            Close(fd1[PIPE_OUTPUT]);
+            // if(close(fd1[PIPE_OUTPUT])<0) {
+            //     perror("ERROR CLOSING PIPE FOR CHILD2");
+            //     exit(-1);
 
-            }
+            // }
 
         }
     }
@@ -162,7 +186,7 @@ const char *readSTDIN(int *count)
     {
         if (n < 0)
         {
-            perror("read error");
+            err_out(BAD_READ,1);
         }
         for (i = 0; i < n; i++)
         {
@@ -193,17 +217,20 @@ void printLine(const char *line)
 {
     int n = strlen(line);
 
-    if (write(STDOUT_FILENO, line, n) != n)
-    {
-        perror("write error");
-        exit(-1);
-    }
-    // Since printLine we send a \n
-    if (write(STDOUT_FILENO, "\n", 2) != 2)
-    {
-        perror("write error");
-        exit(-1);
-    }
+    Write(STDOUT_FILENO,line,n);
+    Write(STDOUT_FILENO,NEW_LINE,strlen(NEW_LINE));
+
+    // if (write(STDOUT_FILENO, line, n) != n)
+    // {
+    //     perror("write error");
+    //     exit(-1);
+    // }
+    // // Since printLine we send a \n
+    // if (write(STDOUT_FILENO, "\n", 2) != 2)
+    // {
+    //     perror("write error");
+    //     exit(-1);
+    // }
 }
 
 int *strToIntArray(char *string, int count)
@@ -211,8 +238,9 @@ int *strToIntArray(char *string, int count)
     int *intElements = (int *)malloc((sizeof(int) * count));
     if (intElements == NULL)
     {
-        perror("ERROR allocating memory.");
-        exit(0);
+        err_out(BAD_ALLOC,0);
+        // perror("ERROR allocating memory.");
+        // exit(0);
     }
     char *token;
     const char delim[] = " ";
@@ -240,9 +268,9 @@ void addNumToString(const char beginString[], int number)
     char *tgt = (char *)malloc(sizeof(char) * MAX_APPEND_STR_SIZE);
     if (tgt == NULL)
     {
-
-        perror("ERROR allocating memory.");
-        exit(-1);
+        err_out(BAD_ALLOC,0);
+        // perror("ERROR allocating memory.");
+        // exit(-1);
     }
 
     // copy the first part to tgt
@@ -253,4 +281,19 @@ void addNumToString(const char beginString[], int number)
     snprintf(tgt, MAX_APPEND_STR_SIZE, "%s %d", beginString, number);
     // send to the printLine function
     printLine(tgt);
+}
+
+
+// From assingment2 solution
+void err_out(char *msg, int printErrNo)
+{
+    char buffer[MAX_BUFFER_SIZE];
+    strcpy(buffer,msg);
+    if (printErrNo == 1)
+    {
+        strcat(buffer, strerror(errno));
+    }
+    strcat(buffer, "\n");
+    write(STDERR_FILENO, buffer, strlen(buffer));
+    exit(-1);
 }

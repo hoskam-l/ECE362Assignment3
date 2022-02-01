@@ -13,9 +13,41 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <errno.h>
 
 #define DECIMAL 10
 #define MAX_APPEND_STR_SIZE 32
+#define MAX_BUFFER_SIZE 1024
+#define BAD_READ  "read error\n"
+#define BAD_WRITE "write error\n"
+#define BAD_INPUT "input error\n"
+#define BAD_CLOSE "close error\n"
+#define BAD_OPEN "open error\n"
+#define BAD_FORK "fork error\n"
+#define BAD_ALLOC "allocate error\n"
+#define BAD_WAITPID "waitPID error\n"
+#define BAD_EXEC "exec error\n"
+#define NEW_LINE "\n"
+
+
+#define Write(f,b,s) if(write(f,b,s) !=s) {err_out(BAD_WRITE,1);}
+
+#define Close(fd) if(close(fd) < 0) {err_out(BAD_CLOSE, 1);}
+
+
+// From assingment2 solution
+void err_out(char *msg, int printErrNo)
+{
+    char buffer[MAX_BUFFER_SIZE];
+    strcpy(buffer,msg);
+    if (printErrNo == 1)
+    {
+        strcat(buffer, strerror(errno));
+    }
+    strcat(buffer, "\n");
+    write(STDERR_FILENO, buffer, strlen(buffer));
+    exit(-1);
+}
 
 void addNumToString(const char beginString[], int number)
 {
@@ -24,9 +56,9 @@ void addNumToString(const char beginString[], int number)
     char *tgt = (char *)malloc(sizeof(char) * MAX_APPEND_STR_SIZE);
     if (tgt == NULL)
     {
-
-        perror("ERROR allocating memory.");
-        exit(-1);
+        err_out(BAD_ALLOC,0);
+        // perror("ERROR allocating memory.");
+        // exit(-1);
     }
     snprintf(tgt, MAX_APPEND_STR_SIZE, "%s %d", beginString, number);
     // send to the printLine function
@@ -38,17 +70,19 @@ void printLine(const char *line)
 {
         int n = strlen(line);
 
-        if (write(STDOUT_FILENO, line, n) != n)
-        {
-                perror("write error");
-                exit(-1);
-        }
+        Write(STDOUT_FILENO,line, n);
+        Write(STDOUT_FILENO,NEW_LINE,strlen(NEW_LINE));
+        // if (write(STDOUT_FILENO, line, n) != n)
+        // {
+        //         perror("write error");
+        //         exit(-1);
+        // }
         // Since printLine we send a \n
-        if (write(STDOUT_FILENO, "\n", 2) != 2)
-        {
-                perror("write error");
-                exit(-1);
-        }
+        // if (write(STDOUT_FILENO, "\n", 2) != 2)
+        // {
+        //         perror("write error");
+        //         exit(-1);
+        // }
 }
 
 // exec_prog from: https://stackoverflow.com/questions/5237482/how-do-i-execute-external-program-within-c-code-in-linux-with-arguments
@@ -65,16 +99,18 @@ static int exec_prog(const char **argv)
         if (child_pid < 0)
         {
                 // Error
-                perror("fork failed");
-                exit(-1);
+                err_out(BAD_FORK,0);
+                // perror("fork failed");
+                // exit(-1);
         }
         else if (child_pid == 0)
         {
                 // Child process, execute code
                 if (-1 == execvp(argv[0], (char **)argv))
                 {
-                        perror("child process execve failed");
-                        exit(-1);
+                        err_out(BAD_EXEC,0);
+                        // perror("child process execve failed");
+                        // exit(-1);
                 }
         }
         else
@@ -86,8 +122,9 @@ static int exec_prog(const char **argv)
                         wpid = waitpid(child_pid, &status, WUNTRACED);
                         if (wpid == -1)
                         {
-                                perror("waitpid");
-                                exit(-1);;
+                                err_out(BAD_WAITPID,0);
+                                // perror("waitpid");
+                                // exit(-1);;
                         }
 
                         if (WIFEXITED(status))
@@ -126,8 +163,10 @@ int main(int argc, char *argv[])
         // if RC is negative there was an error...
         if(rc<0)
         {
-                perror("Error executing program");
-                exit(-1);
+                //should never happen
+                err_out(BAD_EXEC,0);
+                // perror("Error executing program");
+                // exit(-1);
         }
         // end timer and calculate total time
         end = time(NULL) - begin;
