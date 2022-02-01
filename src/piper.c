@@ -2,10 +2,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/wait.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <ctype.h>
 #include <string.h>
-#include <sys/types.h>
+
 
 #define MAX_BUFFER_SIZE 1024
 #define FD_ARRAY_SIZE 2
@@ -18,6 +19,7 @@
 const char *readSTDIN(int *count);
 void printLine(const char *line);
 int *strToIntArray(char *string, int count);
+char *itoa(int value, char *result, int base);
 void addNumToString(const char beginString[], int number);
 
 
@@ -49,21 +51,10 @@ int main(int argc, char *argv[])
     }
 
     // write to pipe
-    int c = write(fd[PIPE_INPUT], inputElements, strlen(inputElements));
-    	if(c == -1)
-	{
-		perror("An error occured writing to pipe 1"); 
-		return 3; 
-	}
+    write(fd[PIPE_INPUT], inputElements, strlen(inputElements));
     close(fd[PIPE_INPUT]);
 
-    int d = write(fd1[PIPE_INPUT], inputElements, strlen(inputElements));
-	if(d == -1)
-	{
-		perror("An error occured writing to pipe 2"); 
-		return 4; 
-	}
-
+    write(fd1[PIPE_INPUT], inputElements, strlen(inputElements));
     close(fd1[PIPE_INPUT]);
 
     // here is the fork
@@ -82,13 +73,6 @@ int main(int argc, char *argv[])
         // printf("hello world from child process child1_pid: %d \n", getpid());
         if ((n = read(fd[PIPE_OUTPUT], buf, MAX_BUFFER_SIZE)) >= 0)
         {
-	if(n == -1)
-	{
-		perror("An error occured reading from pipe 1"); 
-		return 5; 
-	}
-
-	
             buf[n] = '\0'; // terminate the string
             // printf("read %d bytes from the pipe: %s\n", n, buf);
             int *intElementsReturned1 = strToIntArray(buf, elementCount);
@@ -122,13 +106,6 @@ int main(int argc, char *argv[])
         // printf("hello world from child process child2_pid: %d \n", getpid());
         if ((m = read(fd1[PIPE_OUTPUT], buf2, MAX_BUFFER_SIZE)) >= 0)
         {
-	if(m == -1)
-	{
-		perror("An error occured reading from pipe 2"); 
-		return 6; 
-	}
-
-
             buf[m] = '\0'; // terminate the string
             // printf("read %d bytes from the pipe: %s \n", m, buf2);
             int *intElementsReturned2 = strToIntArray(buf2, elementCount);
@@ -147,7 +124,7 @@ int main(int argc, char *argv[])
     else if (child1_pid > 0 && child2_pid > 0)
     {
         wait(NULL);
-       
+        // printf("hello world from parent process child1_pid: %d \n", getpid());
     }
 
     return 0;
@@ -229,6 +206,46 @@ int *strToIntArray(char *string, int count)
 }
 
 
+// from: https://stackoverflow.com/questions/8257714/how-to-convert-an-int-to-string-in-c
+/**
+ * C++ version 0.4 char* style "itoa":
+ * Written by Lukás Chmela
+ * Released under GPLv3.
+ */
+char *itoa(int value, char *result, int base)
+{
+        // check that the base if valid
+        if (base < 2 || base > 36)
+        {
+                *result = '\0';
+                return result;
+        }
+
+        char *ptr = result, *ptr1 = result, tmp_char;
+        int tmp_value;
+
+        do
+        {
+                tmp_value = value;
+                value /= base;
+                *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz"[35 + (tmp_value - value * base)];
+        } while (value);
+
+        // Apply negative sign
+        if (tmp_value < 0)
+                *ptr++ = '-';
+        *ptr-- = '\0';
+        while (ptr1 < ptr)
+        {
+                tmp_char = *ptr;
+                *ptr-- = *ptr1;
+                *ptr1++ = tmp_char;
+        }
+        return result;
+}
+
+
+
 void addNumToString(const char beginString[], int number)
 {
     // constant for first prart of the printLine
@@ -236,7 +253,7 @@ void addNumToString(const char beginString[], int number)
             // Create a string to hold the end time value
             char strNUM[sizeof(int) + 1];
             // convert the int value of the total time to a string
-            snprintf(strNUM, sizeof(int) +1 , "%d", number);  
+            itoa((int)number, strNUM, 10);
             // create a temp string (tgt) the proper size of strTime and beginString
             size_t len1 = strlen(beginString), len2 = strlen(strNUM);
             char *tgt = (char *)malloc(len1 + len2 + 1);
