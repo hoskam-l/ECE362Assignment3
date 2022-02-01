@@ -57,15 +57,15 @@ int main(int argc, char *argv[])
 
 
     // here is the fork
-    pid_t child1_pid, child2_pid;
-    child1_pid = fork();
-    if (child1_pid < 0)
+    pid_t child1PID, child2PID;
+    child1PID = fork();
+    if (child1PID < 0)
     {
         // Error
         err_out(BAD_FORK,0);
     }
     // child process execution 1
-    if (child1_pid == 0)
+    if (child1PID == 0)
     {
         wait(NULL);
         if ((n = read(fd[PIPE_OUTPUT], buf, MAX_BUFFER_SIZE)) >= 0)
@@ -88,10 +88,10 @@ int main(int argc, char *argv[])
         }
     }
     // creates second fork off main
-    if (child1_pid > 0)
+    if (child1PID > 0)
     {
-        child2_pid = fork();
-        if (child2_pid < 0)
+        child2PID = fork();
+        if (child2PID < 0)
         {
             // Error
             err_out(BAD_FORK,0);
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
         wait(NULL);
     }
     // child process execution 2
-    if (child2_pid == 0 && child1_pid != 0)
+    if (child2PID == 0 && child1PID != 0)
     {
         wait(NULL);
         if ((m = read(fd1[PIPE_OUTPUT], buf2, MAX_BUFFER_SIZE)) >= 0)
@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
         }
     }
     // parent process execution
-    else if (child1_pid > 0 && child2_pid > 0)
+    else if (child1PID > 0 && child2PID > 0)
     {
         wait(NULL);
     }

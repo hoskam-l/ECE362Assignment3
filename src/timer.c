@@ -83,18 +83,18 @@ void printLine(const char *line)
 
 static int exec_prog(const char **argv)
 {
-        pid_t child_pid, wpid;
+        pid_t childPID, wpid;
         int status;
         argv++;
 
         // Create fork
-        child_pid = fork();
-        if (child_pid < 0)
+        childPID = fork();
+        if (childPID < 0)
         {
                 // Error
                 err_out(BAD_FORK,0);
         }
-        else if (child_pid == 0)
+        else if (childPID == 0)
         {
                 // Child process, execute code
                 if (-1 == execvp(argv[0], (char **)argv))
@@ -108,7 +108,7 @@ static int exec_prog(const char **argv)
                 //from https://pubs.opengroup.org/onlinepubs/9699919799/
                 do
                 {
-                        wpid = waitpid(child_pid, &status, WUNTRACED);
+                        wpid = waitpid(childPID, &status, WUNTRACED);
                         if (wpid == -1)
                         {
                                 err_out(BAD_WAITPID,0);
