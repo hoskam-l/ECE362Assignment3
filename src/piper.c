@@ -1,3 +1,8 @@
+// Assignment 3 part 2
+// Dr. Schubert
+// by luke hoskam
+// by Hayden Galante
+// Piper Program for Assignment 3
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

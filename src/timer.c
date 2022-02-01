@@ -31,7 +31,6 @@
 
 
 #define Write(f,b,s) if(write(f,b,s) !=s) {err_out(BAD_WRITE,1);}
-
 #define Close(fd) if(close(fd) < 0) {err_out(BAD_CLOSE, 1);}
 
 void err_out(char *msg, int printErrNo);
