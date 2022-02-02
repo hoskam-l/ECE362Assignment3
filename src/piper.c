@@ -19,19 +19,29 @@
 #define PIPE_OUTPUT 0
 #define MAX_APPEND_STR_SIZE 32
 #define BUFFSIZE 10
-#define BAD_READ  "read error\n"
+#define BAD_READ "read error\n"
 #define BAD_WRITE "write error\n"
-#define BAD_INPUT "input error\n"
 #define BAD_CLOSE "close error\n"
 #define BAD_OPEN "open error\n"
 #define BAD_FORK "fork error\n"
 #define BAD_ALLOC "allocate error\n"
 #define NEW_LINE "\n"
-
-
-#define Write(f,b,s) if(write(f,b,s) !=s) {err_out(BAD_WRITE,1);}
-#define Pipe(fd) if(pipe(fd) < 0) {err_out(BAD_OPEN, 1);}
-#define Close(fd) if(close(fd) < 0) {err_out(BAD_CLOSE, 1);}
+// functions defined to from assingment2 solution
+#define Write(f, b, s)         \
+    if (write(f, b, s) != s)   \
+    {                          \
+        err_out(BAD_WRITE, 1); \
+    }
+#define Pipe(fd)              \
+    if (pipe(fd) < 0)         \
+    {                         \
+        err_out(BAD_OPEN, 1); \
+    }
+#define Close(fd)              \
+    if (close(fd) < 0)         \
+    {                          \
+        err_out(BAD_CLOSE, 1); \
+    }
 
 const char *readSTDIN(int *count);
 void printLine(const char *line);
@@ -48,18 +58,14 @@ int main(int argc, char *argv[])
     char buf[MAX_BUFFER_SIZE];
     char buf2[MAX_BUFFER_SIZE];
 
-
     // set up the pipe
 
     Pipe(fd);
-
     Pipe(fd1);
-
     Write(fd[PIPE_INPUT], inputElements, strlen(inputElements));
     Close(fd[PIPE_INPUT]);
     Write(fd1[PIPE_INPUT], inputElements, strlen(inputElements));
     Close(fd1[PIPE_INPUT]);
-
 
     // here is the fork
     pid_t child1PID, child2PID;
@@ -67,7 +73,7 @@ int main(int argc, char *argv[])
     if (child1PID < 0)
     {
         // Error
-        err_out(BAD_FORK,0);
+        err_out(BAD_FORK, 0);
     }
     // child process execution 1
     if (child1PID == 0)
@@ -75,12 +81,12 @@ int main(int argc, char *argv[])
         wait(NULL);
         if ((n = read(fd[PIPE_OUTPUT], buf, MAX_BUFFER_SIZE)) >= 0)
         {
-            if (n <0)
+            if (n < 0)
             {
-                err_out(BAD_READ,0);
+                err_out(BAD_READ, 0);
             }
-
             buf[n] = '\0'; // terminate the string
+            // change from string to an array of ints
             int *intElementsReturned1 = strToIntArray(buf, elementCount);
             int sum = 0;
             for (int i = 0; i < elementCount; i++)
@@ -88,7 +94,7 @@ int main(int argc, char *argv[])
                 sum = sum + intElementsReturned1[i];
             }
             addNumToString("Sum: ", sum);
-
+            // cleanup
             Close(fd[PIPE_OUTPUT]);
         }
     }
@@ -99,8 +105,7 @@ int main(int argc, char *argv[])
         if (child2PID < 0)
         {
             // Error
-            err_out(BAD_FORK,0);
-
+            err_out(BAD_FORK, 0);
         }
         wait(NULL);
     }
@@ -110,7 +115,7 @@ int main(int argc, char *argv[])
         wait(NULL);
         if ((m = read(fd1[PIPE_OUTPUT], buf2, MAX_BUFFER_SIZE)) >= 0)
         {
-            if (m <0)
+            if (m < 0)
             {
                 perror("An error occured reading from pipe 2");
                 return 6;
@@ -124,9 +129,8 @@ int main(int argc, char *argv[])
                 product = product * intElementsReturned2[i];
             }
             addNumToString("Product: ", product);
-
+            // cleanup
             Close(fd1[PIPE_OUTPUT]);
-
         }
     }
     // parent process execution
@@ -137,7 +141,7 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
+// Reads STDIN and returns a string and passes the number of elements back by pointer
 const char *readSTDIN(int *count)
 {
     int n, i;
@@ -150,10 +154,10 @@ const char *readSTDIN(int *count)
     {
         if (n < 0)
         {
-            err_out(BAD_READ,1);
+            err_out(BAD_READ, 1);
         }
         for (i = 0; i < n; i++)
-        {
+        { // isspace finds ' ' and '\n' when found put a space in our string else put the char in the string
             if (isspace(buf[i]))
             {
                 if (!isspace(inputElements[stringElements - 1]))
@@ -170,8 +174,9 @@ const char *readSTDIN(int *count)
             }
         }
     }
+    // Add termiating char
     inputElements[stringElements] = '\0';
-
+    // sets the pointer of elementCout to return and retuns the string
     *count = elementCount;
     return (const char *)inputElements;
 }
@@ -180,17 +185,16 @@ const char *readSTDIN(int *count)
 void printLine(const char *line)
 {
     int n = strlen(line);
-    Write(STDOUT_FILENO,line,n);
-    Write(STDOUT_FILENO,NEW_LINE,strlen(NEW_LINE));
+    Write(STDOUT_FILENO, line, n);
+    Write(STDOUT_FILENO, NEW_LINE, strlen(NEW_LINE));
 }
-
+// takes the input of a string of numbers seperated by a space and returns an integer array
 int *strToIntArray(char *string, int count)
 {
     int *intElements = (int *)malloc((sizeof(int) * count));
     if (intElements == NULL)
     {
-        err_out(BAD_ALLOC,0);
-
+        err_out(BAD_ALLOC, 0);
     }
     char *token;
     const char delim[] = " ";
@@ -204,25 +208,24 @@ int *strToIntArray(char *string, int count)
     }
     return (int *)intElements;
 }
-
+// appends a number to a string and prints the string
 void addNumToString(const char beginString[], int number)
 {
     char *tgt = (char *)malloc(sizeof(char) * MAX_APPEND_STR_SIZE);
     if (tgt == NULL)
     {
-        err_out(BAD_ALLOC,0);
+        err_out(BAD_ALLOC, 0);
     }
     snprintf(tgt, MAX_APPEND_STR_SIZE, "%s %d", beginString, number);
     // send to the printLine function
     printLine(tgt);
 }
 
-
 // From assingment2 solution
 void err_out(char *msg, int printErrNo)
 {
     char buffer[MAX_BUFFER_SIZE];
-    strcpy(buffer,msg);
+    strcpy(buffer, msg);
     if (printErrNo == 1)
     {
         strcat(buffer, strerror(errno));
