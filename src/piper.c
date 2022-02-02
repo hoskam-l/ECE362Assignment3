@@ -122,7 +122,6 @@ int main(int argc, char *argv[])
             // Error
             err_out(BAD_FORK, 0);
         }
-        wait(NULL);
     }
     // child process execution 2
     if (child2PID == 0 && child1PID != 0)
