@@ -13,7 +13,7 @@
 #include <sys/types.h>
 #include <errno.h>
 
-#define MAX_BUFFER_SIZE 1024
+#define MAX_BUFFER_SIZE 5120
 #define FD_ARRAY_SIZE 2
 #define PIPE_INPUT 1
 #define PIPE_OUTPUT 0
