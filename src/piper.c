@@ -81,8 +81,6 @@ int main(int argc, char *argv[])
         char *charElements1;
         int runOnce = 0;
         int totalRead = 0;
-
-        wait(NULL);
         while ((n = read(fd[PIPE_OUTPUT], buf, MAX_BUFFER_SIZE)) > 0)
         {
 
@@ -149,21 +147,7 @@ int main(int argc, char *argv[])
             }
             totalRead = totalRead + n;
         }
-        // wait(NULL);
-        // if ((m = read(fd1[PIPE_OUTPUT], buf, MAX_BUFFER_SIZE)) >= 0)
-        // {
-        //     if (m < 0)
-        //     {
-        //         perror("An error occured reading from pipe 2");
-        //         return 6;
-        //     }
-
-        //     buf[m] = '\0'; // terminate the string
-        //     int *intElementsReturned2 = strToIntArray(buf, elementCount);
-
-        //     // cleanup
-        //     Close(fd1[PIPE_OUTPUT]);
-        // }
+   
         if (n < 0)
         {
             err_out(BAD_READ, 0);
