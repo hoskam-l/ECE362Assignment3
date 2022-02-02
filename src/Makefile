@@ -31,7 +31,7 @@ $(APPNAME1).o: $(APPNAME1).c
 	$(CC) $(CXXFLAGS) -c $<
 
 $(APPNAME1)test: $(APPNAME1)
-	./$(APPNAME1) ls -l /usr/bin
+	./$(APPNAME1) ls -l 
 	./$(APPNAME1) cat timer.c
 	./$(APPNAME1) ping google.com -c5
 	./$(APPNAME1) sleep 5
