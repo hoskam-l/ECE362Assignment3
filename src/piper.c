@@ -13,7 +13,7 @@
 #include <sys/types.h>
 #include <errno.h>
 
-#define MAX_BUFFER_SIZE 5120
+#define MAX_BUFFER_SIZE 10
 #define FD_ARRAY_SIZE 2
 #define PIPE_INPUT 1
 #define PIPE_OUTPUT 0
@@ -54,9 +54,9 @@ int main(int argc, char *argv[])
     int elementCount;
     const char *inputElements = readSTDIN(&elementCount);
     int fd[FD_ARRAY_SIZE], fd1[FD_ARRAY_SIZE];
-    int n, m;
+    int n;
     char buf[MAX_BUFFER_SIZE];
-    char buf2[MAX_BUFFER_SIZE];
+    //char buf[MAX_BUFFER_SIZE];
 
     // set up the pipe
 
@@ -78,25 +78,42 @@ int main(int argc, char *argv[])
     // child process execution 1
     if (child1PID == 0)
     {
+        char *charElements1;
+        int runOnce = 0;
+        int totalRead = 0;
+
         wait(NULL);
-        if ((n = read(fd[PIPE_OUTPUT], buf, MAX_BUFFER_SIZE)) >= 0)
+        while ((n = read(fd[PIPE_OUTPUT], buf, MAX_BUFFER_SIZE)) > 0)
         {
-            if (n < 0)
+
+            if (runOnce == 0)
             {
-                err_out(BAD_READ, 0);
+                charElements1 = (char *)malloc(sizeof(char) * n + 1);
+                strncpy(charElements1, buf, n);
+                runOnce++;
             }
-            buf[n] = '\0'; // terminate the string
-            // change from string to an array of ints
-            int *intElementsReturned1 = strToIntArray(buf, elementCount);
-            int sum = 0;
-            for (int i = 0; i < elementCount; i++)
+            else
             {
-                sum = sum + intElementsReturned1[i];
+                charElements1 = (char *)realloc(charElements1, (sizeof(char) * n) + strlen(charElements1));
+                strncat(charElements1, buf, n);
             }
-            addNumToString("Sum: ", sum);
-            // cleanup
-            Close(fd[PIPE_OUTPUT]);
+            totalRead = totalRead + n;
         }
+        if (n < 0)
+        {
+            err_out(BAD_READ, 0);
+        }
+        // cleanup
+        Close(fd[PIPE_OUTPUT]);
+        buf[n] = '\0'; // terminate the string
+        // change from string to an array of ints
+        int *intElementsReturned1 = strToIntArray(charElements1, elementCount);
+        int sum = 0;
+        for (int i = 0; i < elementCount; i++)
+        {
+            sum = sum + intElementsReturned1[i];
+        }
+        addNumToString("Sum: ", sum);
     }
     // creates second fork off main
     if (child1PID > 0)
@@ -112,27 +129,56 @@ int main(int argc, char *argv[])
     // child process execution 2
     if (child2PID == 0 && child1PID != 0)
     {
-        wait(NULL);
-        if ((m = read(fd1[PIPE_OUTPUT], buf2, MAX_BUFFER_SIZE)) >= 0)
+        char *charElements2;
+        int runOnce = 0;
+        int totalRead = 0;
+        while ((n = read(fd1[PIPE_OUTPUT], buf, MAX_BUFFER_SIZE)) > 0)
         {
-            if (m < 0)
-            {
-                perror("An error occured reading from pipe 2");
-                return 6;
-            }
 
-            buf[m] = '\0'; // terminate the string
-            int *intElementsReturned2 = strToIntArray(buf2, elementCount);
-            int product = 1;
-            for (int i = 0; i < elementCount; i++)
+            if (runOnce == 0)
             {
-                product = product * intElementsReturned2[i];
+                charElements2 = (char *)malloc(sizeof(char) * n + 1);
+                strncpy(charElements2, buf, n);
+                runOnce++;
             }
-            addNumToString("Product: ", product);
-            // cleanup
-            Close(fd1[PIPE_OUTPUT]);
+            else
+            {
+  
+                charElements2 = (char *)realloc(charElements2, (sizeof(char) * n) + strlen(charElements2));
+                strncat(charElements2, buf, n);
+            }
+            totalRead = totalRead + n;
         }
+        // wait(NULL);
+        // if ((m = read(fd1[PIPE_OUTPUT], buf, MAX_BUFFER_SIZE)) >= 0)
+        // {
+        //     if (m < 0)
+        //     {
+        //         perror("An error occured reading from pipe 2");
+        //         return 6;
+        //     }
+
+        //     buf[m] = '\0'; // terminate the string
+        //     int *intElementsReturned2 = strToIntArray(buf, elementCount);
+
+        //     // cleanup
+        //     Close(fd1[PIPE_OUTPUT]);
+        // }
+        if (n < 0)
+        {
+            err_out(BAD_READ, 0);
+        }
+        // cleanup
+        Close(fd1[PIPE_OUTPUT]);
+        int product = 1;
+        int *intElementsReturned2 = strToIntArray(charElements2, elementCount);
+        for (int i = 0; i < elementCount; i++)
+        {
+            product = product * intElementsReturned2[i];
+        }
+        addNumToString("Product: ", product);
     }
+
     // parent process execution
     else if (child1PID > 0 && child2PID > 0)
     {
